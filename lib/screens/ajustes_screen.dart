@@ -79,5 +79,52 @@ class _AjustesScreenState extends State<AjustesScreen> {
       if (!mounted) return;
       Navigator.pop(context);
     }
+    @override
+    Widget build(BuildContext context) {
+      if (_cargando) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      return Scaffold(
+        appBar: AppBar(title: const Text('Ajustes')),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            SwitchListTile(
+              title: const Text('Tema oscuro'),
+              value: _temaOscuro,
+              onChanged: _cambiarTema,
+            ),
+            SwitchListTile(
+              title: const Text('Ocultar habitos completados hoy'),
+              value: _ocultarCompletados,
+              onChanged: _cambiarOcultar,
+            ),
+            const SizedBox(height: 16),
+            const Text('Tamano de letra'),
+            Slider(
+              value: _tamanoLetra,
+              min: 0.8,
+              max: 1.6,
+              divisions: 8,
+              label: _tamanoLetra.toStringAsFixed(1),
+              onChanged: _cambiarTamano,
+            ),
+            const Divider(height: 32),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: _borrarDatos,
+              child: const Text(
+                'Borrar todos los datos',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
   }
 }
