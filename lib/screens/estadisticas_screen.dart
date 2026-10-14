@@ -36,5 +36,20 @@ class _EstadisticasScreenState extends State<EstadisticasScreen> {
       _ultimaApertura = ultima;
       _cargando = false;
     });
+    String _fechaAString(DateTime fecha) {
+      final mes = fecha.month.toString().padLeft(2, '0');
+      final dia = fecha.day.toString().padLeft(2, '0');
+      return '${fecha.year}-$mes-$dia';
+    }
+
+    int _rachaActual(Habito habito) {
+      int racha = 0;
+      DateTime dia = DateTime.now();
+      while (habito.fechascompletado.contains(_fechaAString(dia))) {
+        racha++;
+        dia = dia.subtract(const Duration(days: 1));
+      }
+      return racha;
+    }
   }
 }
