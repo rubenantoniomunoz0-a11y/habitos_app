@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/habito.dart';
-import '../services/preferencias_service.dart';
+import '../services/preferences_service.dart';
 import '../widgets/habito_tile.dart';
 import '../widgets/loading_widget.dart';
 
@@ -12,8 +12,6 @@ class PrincipalScreen extends StatefulWidget {
 }
 
 class _PrincipalScreenState extends State<PrincipalScreen> {
-  final PreferenciasService _prefs = PreferenciasService();
-
   String _nombre = '';
   int _objetivo = 0;
   List<Habito> _habitos = [];
@@ -27,10 +25,10 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    final nombre = await _prefs.leerNombre();
-    final objetivo = await _prefs.leerObjetivo();
-    final habitos = await _prefs.leerHabitos();
-    final ocultar = await _prefs.leerOcultarCompletados();
+    final nombre = await PreferencesService.leerNombre();
+    final objetivo = await PreferencesService.leerObjetivo();
+    final habitos = await PreferencesService.leerHabitos();
+    final ocultar = await PreferencesService.leerOcultarCompletados();
 
     if (!mounted) return;
     setState(() {
@@ -71,7 +69,7 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
       _habitos[index] = actualizado;
     });
 
-    await _prefs.guardarHabitos(_habitos);
+    await PreferencesService.guardarHabitos(_habitos);
   }
 
   int _completadosHoy() {
