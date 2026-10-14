@@ -10,7 +10,6 @@ class BienvenidaScreen extends StatefulWidget {
 }
 
 class _BienvenidaScreenState extends State<BienvenidaScreen> {
-
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _objetivoController = TextEditingController();
 
@@ -44,4 +43,44 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Bienvenido a HabitosApp')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Cuentame un poco sobre ti',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _nombreController,
+              decoration: const InputDecoration(
+                labelText: 'Tu nombre',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _objetivoController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Objetivo diario (n habitos)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _empezar,
+              child: const Text('Empezar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
