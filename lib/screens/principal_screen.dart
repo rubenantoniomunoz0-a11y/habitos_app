@@ -3,6 +3,9 @@ import '../models/habito.dart';
 import '../services/preferences_service.dart';
 import '../widgets/habito_tile.dart';
 import '../widgets/loading_widget.dart';
+import 'estadisticas_screen.dart';
+import 'ajustes_screen.dart';
+import 'gestion_habitos_screen.dart';
 
 class PrincipalScreen extends StatefulWidget {
   const PrincipalScreen({super.key});
@@ -101,12 +104,23 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Estadisticas',
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EstadisticasScreen()),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Ajustes',
-            onPressed: () {},
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AjustesScreen()),
+              );
+              _cargarDatos();
+            },
           ),
         ],
       ),
@@ -144,7 +158,13 @@ class _PrincipalScreenState extends State<PrincipalScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Gestionar habitos',
-        onPressed: () {},
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const GestionHabitosScreen()),
+          );
+          _cargarDatos();
+        },
         child: const Icon(Icons.edit),
       ),
     );
