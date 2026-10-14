@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/preferencias_service.dart';
+import '../services/preferences_service.dart';
 
 class AjustesScreen extends StatefulWidget {
   const AjustesScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/preferencias_service.dart';
+import '../services/preferences_service.dart';
 import 'principal_screen.dart';
 
 class BienvenidaScreen extends StatefulWidget {
