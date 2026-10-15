@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/habito.dart';
 import '../services/preferences_service.dart';
 
+// Pantalla de gestión: crear, editar y borrar hábitos.
+// Cada cambio se guarda al momento en SharedPreferences.
 class GestionHabitosScreen extends StatefulWidget {
   const GestionHabitosScreen({super.key});
 
@@ -10,9 +12,13 @@ class GestionHabitosScreen extends StatefulWidget {
 }
 
 class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
+  // Servicio que centraliza el acceso a SharedPreferences.
   final PreferenciasService _prefs = PreferenciasService();
 
+  // Lista de hábitos que se muestra en pantalla.
   List<Habito> _habitos = [];
+
+  // Mientras se leen los hábitos guardados.
   bool _cargando = true;
 
   @override
@@ -21,6 +27,7 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
     _cargar();
   }
 
+  // Leo los hábitos guardados nada más entrar en la pantalla.
   Future<void> _cargar() async {
     final habitos = await _prefs.leerHabitos();
     if (!mounted) return;
@@ -30,9 +37,11 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
     });
   }
 
+  // Crear o edita un hábito según el index.
   Future<void> _mostrarFormulario({int? index}) async {
     final TextEditingController nombreController = TextEditingController();
 
+    // Si estamos editando, ponemos el nombre actual en el campo.
     if (index != null) {
       nombreController.text = _habitos[index].nombre;
     }
@@ -58,6 +67,7 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
             ElevatedButton(
               onPressed: () {
                 final nombre = nombreController.text.trim();
+                // No permitimos guardar un hábito sin nombre.
                 if (nombre.isEmpty) return;
                 Navigator.pop(context, nombre);
               },
@@ -68,9 +78,11 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
       },
     );
 
+    // Si el usuario cancela o deja el campo vacío, no hacemos nada.
     if (resultado == null || resultado.isEmpty) return;
 
     if (index == null) {
+      // Crear: id único usando la marca de tiempo actual.
       final nuevo = Habito(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         nombre: resultado,
@@ -81,6 +93,7 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
         _habitos.add(nuevo);
       });
     } else {
+      // Editar: conservamos id, color y fechas del hábito original.
       final original = _habitos[index];
       final editado = Habito(
         id: original.id,
@@ -96,6 +109,7 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
     await _prefs.guardarHabitos(_habitos);
   }
 
+  // Pide confirmación y borra el hábito indicado.
   Future<void> _borrar(int index) async {
     final confirmado = await showDialog<bool>(
       context: context,
@@ -130,6 +144,8 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Gestionar habitos')),
+      // Mientras carga, mostramos un indicador. Si no hay hábitos,
+      // un texto. Si hay, la lista.
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _habitos.isEmpty
@@ -139,10 +155,12 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
         itemBuilder: (context, i) {
           final habito = _habitos[i];
           return ListTile(
+            // El círculo lleva el color del hábito.
             leading: CircleAvatar(
               backgroundColor: Color(habito.color),
             ),
             title: Text(habito.nombre),
+            // Botones para editar y borrar el hábito.
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -159,6 +177,7 @@ class _GestionHabitosScreenState extends State<GestionHabitosScreen> {
           );
         },
       ),
+      // Botón flotante para crear un hábito nuevo.
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarFormulario(),
         child: const Icon(Icons.add),
