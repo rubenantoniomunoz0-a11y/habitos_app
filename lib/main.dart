@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/bienvenida_screen.dart';
 import 'screens/principal_screen.dart';
-import 'services/preferencias_service.dart';
+import 'services/preferences_service.dart';
 import 'widgets/loading_widget.dart';
 
 void main() {

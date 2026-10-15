@@ -1,67 +1,120 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/habito.dart';
+import 'claves_prefs.dart';
 
-class PreferencesService {
-  static late SharedPreferences _prefs;
-
-  // Inicializa la instancia de SharedPreferences
-  static Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+class PreferenciasService {
+  Future<void> guardarNombre(String nombre) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(ClavesPrefs.nombre, nombre);
   }
 
-  // --- USO DE LOS 5 TIPOS DE DATOS DE SHAREDPREFERENCES ---
-
-  // 1. STRING: Guarda el nombre del usuario
-  static Future<bool> setNombreUsuario(String nombre) async {
-    return await _prefs.setString('usuario_nombre', nombre);
+  Future<String?> leerNombre() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(ClavesPrefs.nombre);
   }
 
-  static String getNombreUsuario() {
-    return _prefs.getString('usuario_nombre') ?? 'Usuario';
+  Future<void> guardarObjetivo(int objetivo) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(ClavesPrefs.objetivo, objetivo);
   }
 
-  // 2. INT: Guarda la meta diaria de hábitos a cumplir
-  static Future<bool> setMetaDiaria(int meta) async {
-    return await _prefs.setInt('meta_diaria', meta);
+  Future<int> leerObjetivo() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(ClavesPrefs.objetivo) ?? 3;
   }
 
-  static int getMetaDiaria() {
-    return _prefs.getInt('meta_diaria') ?? 3;
+  Future<bool> esPrimeraEjecucion() async {
+    final nombre = await leerNombre();
+    return nombre == null;
   }
 
-  // 3. DOUBLE: Guarda el porcentaje de racha o progreso alcanzado
-  static Future<bool> setProgresoHistoria(double porcentaje) async {
-    return await _prefs.setDouble('progreso_historia', porcentaje);
+  Future<void> guardarHabitos(List<Habito> habitos) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String jsonString = jsonEncode(
+      habitos.map((h) => h.toJson()).toList(),
+    );
+    await prefs.setString(ClavesPrefs.habitos, jsonString);
   }
 
-  static double getProgresoHistoria() {
-    return _prefs.getDouble('progreso_historia') ?? 0.0;
-  }
+  Future<List<Habito>> leerHabitos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? jsonString = prefs.getString(ClavesPrefs.habitos);
 
-  // 4. BOOL: Guarda la preferencia de tema oscuro / claro
-  static Future<bool> setModoOscuro(bool valor) async {
-    return await _prefs.setBool('modo_oscuro', valor);
-  }
+    if (jsonString == null) return [];
 
-  static bool getModoOscuro() {
-    return _prefs.getBool('modo_oscuro') ?? false;
-  }
-
-  // 5. LIST<STRING>: Guarda la lista de hábitos serializada en JSON
-  static Future<bool> guardarHabitos(List<Habito> habitos) async {
-    List<String> habitosJson = habitos
-        .map((habito) => jsonEncode(habito.toJson()))
+    final List<dynamic> lista = jsonDecode(jsonString);
+    return lista
+        .map((item) => Habito.fromJson(item as Map<String, dynamic>))
         .toList();
-    return await _prefs.setStringList('lista_habitos', habitosJson);
   }
 
-  static List<Habito> obtenerHabitos() {
-    List<String>? habitosJson = _prefs.getStringList('lista_habitos');
-    if (habitosJson == null) return [];
+  Future<void> registrarApertura() async {
+    final prefs = await SharedPreferences.getInstance();
 
-    return habitosJson
-        .map((item) => Habito.fromJson(jsonDecode(item)))
-        .toList();
+    final int actual = prefs.getInt(ClavesPrefs.aperturas) ?? 0;
+    await prefs.setInt(ClavesPrefs.aperturas, actual + 1);
+
+    final String ahora = DateTime.now().toIso8601String();
+    await prefs.setString(ClavesPrefs.ultimaApertura, ahora);
+
+    final List<String> historial =
+        prefs.getStringList(ClavesPrefs.historialAperturas) ?? [];
+    historial.add(ahora);
+    final List<String> recortado = historial.length > 10
+        ? historial.sublist(historial.length - 10)
+        : historial;
+    await prefs.setStringList(ClavesPrefs.historialAperturas, recortado);
+  }
+
+  Future<int> leerAperturas() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(ClavesPrefs.aperturas) ?? 0;
+  }
+
+  Future<DateTime?> leerUltimaApertura() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? iso = prefs.getString(ClavesPrefs.ultimaApertura);
+    return iso == null ? null : DateTime.tryParse(iso);
+  }
+
+  Future<List<String>> leerHistorialAperturas() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(ClavesPrefs.historialAperturas) ?? [];
+  }
+
+  Future<void> guardarTemaOscuro(bool oscuro) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(ClavesPrefs.temaOscuro, oscuro);
+  }
+
+  Future<bool> leerTemaOscuro() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(ClavesPrefs.temaOscuro) ?? false;
+  }
+
+  Future<void> guardarOcultarCompletados(bool ocultar) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(ClavesPrefs.ocultarCompletados, ocultar);
+  }
+
+  Future<bool> leerOcultarCompletados() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(ClavesPrefs.ocultarCompletados) ?? false;
+  }
+
+  Future<void> guardarTamanoLetra(double tamano) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(ClavesPrefs.tamanoLetra, tamano);
+  }
+
+  Future<double> leerTamanoLetra() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(ClavesPrefs.tamanoLetra) ?? 1.0;
+  }
+
+  Future<void> borrarTodo() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 }

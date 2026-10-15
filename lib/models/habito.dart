@@ -1,12 +1,11 @@
-
+/// Modelo de un hábito. Se guarda serializado en JSON dentro de
+/// SharedPreferences, ya que esta solo admite tipos básicos.
 class Habito {
-  // ---- Campos ----
   final String id;
   final String nombre;
   final int color;
   final List<String> fechascompletado;
 
-  // ---- Constructor normal ----
   Habito({
     required this.id,
     required this.nombre,
@@ -14,16 +13,14 @@ class Habito {
     required this.fechascompletado,
   });
 
-  // ---- Constructor desde JSON ----
-  // Recibe un Map y va leyendo cada campo.
+  // Construye un Habito a partir del Map que devuelve jsonDecode.
   Habito.fromJson(Map<String, dynamic> json)
       : id = json['id'] as String,
         nombre = json['nombre'] as String,
         color = json['color'] as int,
         fechascompletado = List<String>.from(json['fechascompletado']);
 
-  // ---- Método a JSON ----
-  // Devuelve un Map con los mismos nombres de campos.
+  // Convierte el objeto a Map para poder guardarlo con jsonEncode.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
