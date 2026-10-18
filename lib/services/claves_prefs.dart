@@ -1,4 +1,6 @@
+
 class ClavesPrefs {
+  // Constructor privado
   ClavesPrefs._();
 
   static const String nombre = 'nombre_usuario';

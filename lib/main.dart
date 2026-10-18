@@ -8,6 +8,8 @@ void main() {
   runApp(const HabitosApp());
 }
 
+// Widget raíz de la app. Como necesito leer SharedPreferences antes
+// de decidir qué pantalla mostrar, tiene que ser Stateful.
 class HabitosApp extends StatefulWidget {
   const HabitosApp({super.key});
 
@@ -16,8 +18,10 @@ class HabitosApp extends StatefulWidget {
 }
 
 class _HabitosAppState extends State<HabitosApp> {
+  // Servicio que centraliza el acceso a SharedPreferences.
   final PreferenciasService _prefs = PreferenciasService();
 
+  // Estados que se leen al arrancar.
   bool _cargando = true;
   bool _primeraVez = true;
   bool _temaOscuro = false;
@@ -29,6 +33,7 @@ class _HabitosAppState extends State<HabitosApp> {
     _inicializar();
   }
 
+  // Al arrancar la app: registro la apertura y leo los ajustes.
   Future<void> _inicializar() async {
     await _prefs.registrarApertura();
 
@@ -47,6 +52,7 @@ class _HabitosAppState extends State<HabitosApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Mientras se leen los datos, mostramos un indicador de carga.
     if (_cargando) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -57,9 +63,11 @@ class _HabitosAppState extends State<HabitosApp> {
     return MaterialApp(
       title: 'HabitosApp',
       debugShowCheckedModeBanner: false,
+      // Aplica el tema claro u oscuro según el ajuste guardado.
       themeMode: _temaOscuro ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      // MediaQuery para cambiar el tamaño de letra en toda la app.
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
@@ -68,6 +76,8 @@ class _HabitosAppState extends State<HabitosApp> {
           child: child!,
         );
       },
+      // Si es la primera vez que se abre, muestra Bienvenida.
+      // Si no, va directo a Principal.
       home: _primeraVez
           ? const BienvenidaScreen()
           : const PrincipalScreen(),
