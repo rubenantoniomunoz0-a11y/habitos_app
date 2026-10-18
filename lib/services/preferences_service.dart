@@ -3,12 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/habito.dart';
 import 'claves_prefs.dart';
 
+// Las pantallas llaman a estos métodos, nunca a SharedPreferences directamente.
 class PreferenciasService {
+
+  // --- USUARIO ---
+
   Future<void> guardarNombre(String nombre) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(ClavesPrefs.nombre, nombre);
   }
 
+  // Devuelve null si es la primera vez que se abre la app.
   Future<String?> leerNombre() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(ClavesPrefs.nombre);
@@ -29,6 +34,10 @@ class PreferenciasService {
     return nombre == null;
   }
 
+  // --- HÁBITOS ---
+
+  // SharedPreferences no guarda listas de objetos, así que paso la lista
+  // a un String en formato JSON con jsonEncode.
   Future<void> guardarHabitos(List<Habito> habitos) async {
     final prefs = await SharedPreferences.getInstance();
     final String jsonString = jsonEncode(
@@ -37,10 +46,12 @@ class PreferenciasService {
     await prefs.setString(ClavesPrefs.habitos, jsonString);
   }
 
+  // Leo el JSON y lo vuelvo a convertir en lista de objetos Habito.
   Future<List<Habito>> leerHabitos() async {
     final prefs = await SharedPreferences.getInstance();
     final String? jsonString = prefs.getString(ClavesPrefs.habitos);
 
+    // Primera vez: no hay nada guardado.
     if (jsonString == null) return [];
 
     final List<dynamic> lista = jsonDecode(jsonString);
@@ -49,15 +60,21 @@ class PreferenciasService {
         .toList();
   }
 
+  // --- ESTADÍSTICAS ---
+
   Future<void> registrarApertura() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // 1. Contador (int)
     final int actual = prefs.getInt(ClavesPrefs.aperturas) ?? 0;
     await prefs.setInt(ClavesPrefs.aperturas, actual + 1);
 
+    // 2. Última apertura (String ISO)
     final String ahora = DateTime.now().toIso8601String();
     await prefs.setString(ClavesPrefs.ultimaApertura, ahora);
 
+    // 3. Historial (List<String>). Guardo solo las 10 últimas fechas
+    // para que no crezca sin control.
     final List<String> historial =
         prefs.getStringList(ClavesPrefs.historialAperturas) ?? [];
     historial.add(ahora);
@@ -72,6 +89,7 @@ class PreferenciasService {
     return prefs.getInt(ClavesPrefs.aperturas) ?? 0;
   }
 
+  // La fecha está guardada como String ISO, la convierto a DateTime.
   Future<DateTime?> leerUltimaApertura() async {
     final prefs = await SharedPreferences.getInstance();
     final String? iso = prefs.getString(ClavesPrefs.ultimaApertura);
@@ -82,6 +100,8 @@ class PreferenciasService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(ClavesPrefs.historialAperturas) ?? [];
   }
+
+  // --- AJUSTES ---
 
   Future<void> guardarTemaOscuro(bool oscuro) async {
     final prefs = await SharedPreferences.getInstance();
@@ -112,6 +132,8 @@ class PreferenciasService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(ClavesPrefs.tamanoLetra) ?? 1.0;
   }
+
+  // --- BORRAR----
 
   Future<void> borrarTodo() async {
     final prefs = await SharedPreferences.getInstance();
